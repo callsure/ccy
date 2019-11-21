@@ -5,7 +5,12 @@ import random
 import shelve
 import string
 
+import sys
+
 create_path = "/Users/xlin/Work/xcode/ccy/ccy"
+if len(sys.argv) > 1:
+    create_num = sys.argv[1]
+
 full_path = create_path + '/use_db'
 s = shelve.open(full_path)
 rss = 'zyxwvutsrqponmlkjihgfedcba'

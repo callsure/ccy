@@ -7,18 +7,15 @@ import sys
 
 from create_file import text_createH, text_createM
 from create_method import classArray, methodObject
-from random_word import load_word, random_word
-
-s2 = sys.argv[1]
-s1 = sys.argv[2]
+from random_word import random_word
 
 create_path = "/Users/xlin/Work/xcode/ccy/ccy"
 create_num = 3
-if s1 != "":
-    create_path = s1
-if s2 != "":
-    create_num = s2
-load_word()
+if len(sys.argv) > 2:
+    create_num = sys.argv[1]
+    create_path = sys.argv[2]
+elif len(sys.argv) == 2:
+    create_num = sys.argv[1]
 # 随机文件数量
 ss = random_word(int(create_num))
 #定义4个list存储
