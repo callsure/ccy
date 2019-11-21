@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 # 生成代码入口
 import random
-
+import shelve
 import sys
 
 from create_file import text_createH, text_createM
@@ -21,6 +21,11 @@ if s2 != "":
 load_word()
 # 随机文件数量
 ss = random_word(int(create_num))
+#定义4个list存储
+string_arrs = []
+int_arr = []
+long_arr = []
+void_arr = []
 for s in ss:
     arr = []
     menthodNum = random.randint(1, 4)
@@ -41,9 +46,18 @@ for s in ss:
                 #随机参数
                 pa = random.choice(classArray)
                 params.append(pa)
-        test_method = methodObject(menthodNames[num - 1] + menthodNames[num][0].upper() + menthodNames[num][1:], needReturn, returnParam, params)
+        test_method = methodObject(menthodNames[num - 1] + menthodNames[num][0].upper() + menthodNames[num][1:], needReturn, returnParam, params, s)
         arr.append(test_method)
         num += 1
+        if needReturn == True:
+            if returnParam == 'int':
+                int_arr.append(test_method)
+            elif returnParam == 'NSString*':
+                string_arrs.append(test_method)
+            elif returnParam == 'long':
+                long_arr.append(test_method)
+        else:
+            void_arr.append(test_method)
     msg1 = '#import <Foundation/Foundation.h>'
     msg2 = '@interface ' + s + ' : NSObject'
     msg3 = '@end'
@@ -53,4 +67,16 @@ for s in ss:
     msg5 = '#import <Foundation/Foundation.h>\n#import <CommonCrypto/CommonDigest.h>\n#import "' + s + '.h"'
     msg4 = '@interface ' + s + '()\n@end\n@implementation ' + s
     text_createM(s, create_path, msg5, msg4, msg3, arr)
+
+#########
+#生成使用的文件
+full_path = create_path + '/use_db'
+s = shelve.open(full_path)
+try:
+    s['string_arrs'] = string_arrs
+    s['int_arr'] = int_arr
+    s['long_arr'] = long_arr
+    s['void_arr'] = void_arr
+finally:
+    s.close()
 

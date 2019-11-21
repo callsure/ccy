@@ -5,11 +5,12 @@ import random
 
 class methodObject:
     """方法的类"""
-    def __init__(self, methodName, needRetuen, returnType, params):
+    def __init__(self, methodName, needRetuen, returnType, params, fName):
         self.methodName = methodName
         self.needRetuen = needRetuen
         self.returnType = returnType
         self.params = params
+        self.fName = fName
 
 classArray = ['NSString*','int', 'long']
 
@@ -37,11 +38,11 @@ def randomType():
 #实现简单的逻辑操作
 def handle_method(returnType, params):
     res =''
-    param = ''
-    if params:
-        param = random.choice(params)
-    else:
-        pass
+    # param = ''
+    # if params:
+    #     param = random.choice(params)
+    # else:
+    #     pass
     if returnType == 'NSString*':
         res += '\tNSString *same = @"ok了";\n'
         res += handle_param(returnType)
@@ -63,7 +64,7 @@ def handle_method(returnType, params):
 marks = ['+', '-', '*', '/']
 def handle_param(returnType):
     res = ''
-    i = random.randint(1, 11)
+    i = random.randint(1, 21)
     if i == 1:
         res += '\tNSString* strType = @"i love apple";\n\tNSLog(@"输出了：%@",strType);\n'
     elif i == 2:
@@ -245,10 +246,152 @@ def handle_param(returnType):
         res += '\t\t}\n'
         res += '\t[array replaceObjectAtIndex:j+1 withObject:temp];\n'
         res += '\t}\n'
+    elif i == 11:
+        res += '\tint count = 0;\n'
+        res += '\tint leng = ' + str(random.randint(200, 300)) + ';\n'
+        res += '\tfor (int i = 101; i < leng; i+=2) {\n'
+        res += '\t\tbool flag = true;\n'
+        res += '\t\tfor(int j = 2; j <= sqrt(i); j++) {\n'
+        res += '\t\t\tif(i%j == 0) {\n'
+        res += '\t\t\t\tflag = false;\n'
+        res += '\t\t\t\tbreak;\n'
+        res += '\t\t\t}\n'
+        res += '\t\t}\n'
+        res += '\t\tif (flag == true) {\n'
+        res += '\t\t\tcount++;\n'
+        res += '\t\t\tNSLog(@"ss:%d", i);\n'
+        res += '\t\t}\n'
+        res += '\t}\n'
+    elif i == 12:
+        res += '\tint n = ' + str(random.randint(100, 300)) + ';\n'
+        res += '\tint k= 2;\n'
+        res += '\twhile (n >= k) {\n'
+        res += '\t\tif (n == k) {\n'
+        res += '\t\t\tNSLog(@"k：%d",k);\n'
+        res += '\t\t\tbreak;\n'
+        res += '\t\t} else if (n % k == 0) {\n'
+        res += '\t\t\tNSLog(@"k：%d",k);\n'
+        res += '\t\t\tn = n / k;\n'
+        res += '\t\t} else {\n'
+        res += '\t\t\tk++;\n'
+        res += '\t\t}\n'
+        res += '\t}\n'
+    elif i == 13:
+        res += '\tint a = ' + str(random.randint(1, 300)) + ';\n'
+        res += '\tint b = ' + str(random.randint(1, 300)) + ';\n'
+        res += '\tif (a < b) {\n'
+        res += '\t\tint t = b;\n'
+        res += '\t\tb = a;\n'
+        res += '\t\ta = t;\n'
+        res += '\t}\n'
+        res += '\twhile (b != 0) {\n'
+        res += '\t\tif (a == b) {\n'
+        res += '\t\t\tbreak;\n'
+        res += '\t\t}\n'
+        res += '\t\tint x = b;\n'
+        res += '\t\tb = a % b;\n'
+        res += '\t\ta = x;\n'
+        res += '\t}\n'
+        res += '\tNSLog(@"最小公因数：%d",a);\n'
+    elif i == 14:
+        res += '\tint a = ' + str(random.randint(1, 80)) + ';\n'
+        res += '\tint n = ' + str(random.randint(1, 20)) + ';\n'
+        res += '\tint sum = 0, b = 0;\n'
+        res += '\tfor (int i=0; i<n; i++) {\n'
+        res += '\t\tb += a;\n'
+        res += '\t\tsum += b;\n'
+        res += '\t\ta = a * 10;\n'
+        res += '\t}\n'
+        res += '\tNSLog(@"sum：%d",sum);\n'
+    elif i == 15:
+        res += '\tint count = 0;\n'
+        res += '\tfor (int i=1; i<5; i++) {\n'
+        res += '\t\tfor (int j=1; j<5; j++) {\n'
+        res += '\t\t\tfor (int k=1; k<5; k++) {\n'
+        res += '\t\t\t\tif (i != j && j != k && i != k) {\n'
+        res += '\t\t\t\t\tcount++;\n'
+        res += '\t\t\t\t\tNSLog(@"k：%d",i*100+j*10+k);\n'
+        res += '\t\t\t\t}\n'
+        res += '\t\t\t}\n'
+        res += '\t\t}\n'
+        res += '\t}\n'
+        res += '\tNSLog(@"count：%d",count);\n'
+    elif i == 16:
+        res += '\tint x = ' + str(random.randint(1, 300)) + ';\n'
+        res += '\tint y = ' + str(random.randint(1, 500)) + ';\n'
+        res += '\tint z = ' + str(random.randint(1, 1000)) + ';\n'
+        res += '\tint t = 0;\n'
+        res += '\tif (x > y) {\n'
+        res += '\t\tt = x;\n'
+        res += '\t\tx = y;\n'
+        res += '\t\ty = t;\n'
+        res += '\t}\n'
+        res += '\tif (y > z) {\n'
+        res += '\t\tt = z;\n'
+        res += '\t\tz = y;\n'
+        res += '\t\ty = t;\n'
+        res += '\t}\n'
+        res += '\tif (x > y) {\n'
+        res += '\t\tt = x;\n'
+        res += '\t\tx = y;\n'
+        res += '\t\ty = t;\n'
+        res += '\t}\n'
+        res += '\tNSLog(@"x,y,z：%d,%d,%d",x,y,z);\n'
+    elif i == 17:
+        res += '\tint n = ' + str(random.randint(1, 300)) + ';\n'
+        res += '\tdouble sum = 0;\n'
+        res += '\tif (n%2 == 0) {\n'
+        res += '\t\tfor (int i=2; i<=n; i+=2) {\n'
+        res += '\t\t\tsum += (double)1/i;\n'
+        res += '\t\t}\n'
+        res += '\t} else {\n'
+        res += '\t\tfor (int i=1; i<=n; i+=2) {\n'
+        res += '\t\t\tsum += (double)1/i;\n'
+        res += '\t\t}\n'
+        res += '\t}\n'
+        res += '\tNSLog(@"sum：%f",sum);\n'
+    elif i == 18:
+        res += '\tint i,m,j=0,k,count;\n'
+        res += '\tfor(i=4;i<10000;i+=4) {\n'
+        res += '\t\tcount=0;\n'
+        res += '\t\tm=i;\n'
+        res += '\t\tfor(k=0;k<5;k++){\n'
+        res += '\t\t\tj=i/4*5+1;\n'
+        res += '\t\t\ti=j;\n'
+        res += '\t\t\tif(j%4==0)\n'
+        res += '\t\t\t\tcount++;\n'
+        res += '\t\t\telse break;\n'
+        res += '\t\t}\n'
+        res += '\t\ti=m;\n'
+        res += '\t\tif(count==4) {\n'
+        res += '\t\t\tNSLog(@"桃子：%d",j);\n'
+        res += '\t\t\tbreak;\n'
+        res += '\t\t}\n'
+        res += '\t}\n'
+    elif i == 19:
+        res += '\tint H = 7, W = 7;\n'
+        res += '\tfor(int i=0; i<(H+1) / 2; i++) {\n'
+        res += '\t\tfor(int j=0; j<W/2-i; j++) {\n'
+        res += '\t\t\tprintf(" ");\n'
+        res += '\t\t}\n'
+        res += '\t\tfor(int k=1; k<(i+1)*2; k++) {\n'
+        res += '\t\t\tprintf("*");\n'
+        res += '\t\t}\n'
+        res += '\t\tprintf("\\n");\n'
+        res += '\t}\n'
+        res += '\tfor(int i=1; i<=H/2; i++) {\n'
+        res += '\t\tfor(int j=1; j<=i; j++) {\n'
+        res += '\t\t\tprintf(" ");\n'
+        res += '\t\t}\n'
+        res += '\t\tfor(int k=1; k<=W-2*i; k++) {\n'
+        res += '\t\t\tprintf("*");\n'
+        res += '\t\t}\n'
+        res += '\t\tprintf("\\n");\n'
+        res += '\t}\n'
     else:
-        res += '\tint a1 = ' + str(random.randint(1, 100)) + ';\n'
-        res += '\tint a2 = ' + str(random.randint(1, 100)) + ';\n'
-        res += '\tint rate = ' + str(random.randint(1, 100)) + ';\n'
-        res += '\tint a3 = a1 ' + random.choice(marks) + ' a2 ' + random.choice(marks) + ' rate;\n'
-        res += '\tNSLog(@"总值：%d",a3);\n'
+        res += '\tfor (int i=1; i<10; i++) {\n'
+        res += '\t\tfor (int j=1; j<=i; j++) {\n'
+        res += '\t\t\tNSLog(@"%d*%d=%d",i,j,i*j);\n'
+        res += '\t\t}\n'
+        res += '\t}\n'
     return res

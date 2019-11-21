@@ -35,9 +35,9 @@ def text_createH(fileName, path, msg1, msg2, msg3, methodArray):
             i += 1
         methodPamam = methodPamam.rstrip()
         if methodPamam == '':
-            file.write('-(' + methodHead + ') ' + method.methodName + ';\n')
+            file.write('+(' + methodHead + ') ' + method.methodName + ';\n')
         else:
-            file.write('-(' + methodHead + ') ' + method.methodName + methodPamam + ';\n')
+            file.write('+(' + methodHead + ') ' + method.methodName + methodPamam + ';\n')
     file.write('\n')
     file.write(msg3)
     file.flush()
@@ -73,9 +73,9 @@ def text_createM(fileName, path, msg1, msg2, msg3, methodArray):
             i += 1
         methodPamam = methodPamam.rstrip() + ' {\n'
         if methodPamam == '':
-            file.write('-(' + methodHead + ') ' + method.methodName)
+            file.write('+(' + methodHead + ') ' + method.methodName)
         else:
-            file.write('-(' + methodHead + ') ' + method.methodName + methodPamam)
+            file.write('+(' + methodHead + ') ' + method.methodName + methodPamam)
 
         methodBody = handle_method(method.returnType, method.params)
         file.write(methodBody)
