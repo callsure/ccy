@@ -20,11 +20,11 @@ try:
     long_arr = s['long_arr']
     void_arr = s['void_arr']
 
-    cppstring_arrs = s['cppstring_arrs']
-    cppint_arr = s['cppint_arr']
-    cpplong_arr = s['cpplong_arr']
-    cppvoid_arr = s['cppvoid_arr']
-    cppbool_arr = s['cppbool_arr']
+    # cppstring_arrs = s['cppstring_arrs']
+    # cppint_arr = s['cppint_arr']
+    # cpplong_arr = s['cpplong_arr']
+    # cppvoid_arr = s['cppvoid_arr']
+    # cppbool_arr = s['cppbool_arr']
 finally:
     s.close()
 
@@ -81,62 +81,62 @@ def randomString():
 
 
 ###########获取cpp的方法调用########
-def getCppStringReturn():
-    if len(cppstring_arrs):
-        one = random.choice(cppstring_arrs)
-        s = one.fName + '::' + one.methodName + addParamToCallCpp(one.params, 0)
-        return s
-    return '"' + randomString() + '"'
-def getCppIntReturn():
-    if len(cppint_arr):
-        one = random.choice(cppint_arr)
-        s = one.fName + '::' + one.methodName + addParamToCallCpp(one.params, 0)
-        return s
-    return random.randint(1, 1000)
-def getCppLongReturn():
-    if len(cpplong_arr):
-        one = random.choice(cpplong_arr)
-        s = one.fName + '::' + one.methodName + addParamToCallCpp(one.params, 0)
-        return s
-    return random.randint(1, 1000)
-def getCppVoidReturn():
-    if len(cppvoid_arr):
-        one = random.choice(cppvoid_arr)
-        s = one.fName + '::' + one.methodName + addParamToCallCpp(one.params, 0)
-        return s
-    return ''
-def getCppBoolReturn():
-    if len(cppbool_arr):
-        one = random.choice(cppbool_arr)
-        s = one.fName + '::' + one.methodName + addParamToCallCpp(one.params, 0)
-        return s
-    return 'true'
-
-def addParamToCallCpp(params, times):
-    ss = '('
-    i = 0
-    for param in params:
-        if param == 'int' or param == 'long':
-            p = random.randint(1, 1000)
-            if i != 0:
-                ss += ' ,' + str(p)
-            else:
-                ss += str(p)
-        elif param == 'string':
-            p = randomString()
-            if i != 0:
-                ss += ' ,"' + p + '"'
-            else:
-                ss += '"' + p + '"'
-        elif param == 'bool':
-            j = random.randint(0, 1)
-            flag = 'true'
-            if j == 0:
-                flag = 'false'
-            if i != 0:
-                ss += ' ,' + flag
-            else:
-                ss += flag
-        i += 1
-    ss += ')'
-    return ss
+# def getCppStringReturn():
+#     if len(cppstring_arrs):
+#         one = random.choice(cppstring_arrs)
+#         s = one.fName + '::' + one.methodName + addParamToCallCpp(one.params, 0)
+#         return s
+#     return '"' + randomString() + '"'
+# def getCppIntReturn():
+#     if len(cppint_arr):
+#         one = random.choice(cppint_arr)
+#         s = one.fName + '::' + one.methodName + addParamToCallCpp(one.params, 0)
+#         return s
+#     return random.randint(1, 1000)
+# def getCppLongReturn():
+#     if len(cpplong_arr):
+#         one = random.choice(cpplong_arr)
+#         s = one.fName + '::' + one.methodName + addParamToCallCpp(one.params, 0)
+#         return s
+#     return random.randint(1, 1000)
+# def getCppVoidReturn():
+#     if len(cppvoid_arr):
+#         one = random.choice(cppvoid_arr)
+#         s = one.fName + '::' + one.methodName + addParamToCallCpp(one.params, 0)
+#         return s
+#     return ''
+# def getCppBoolReturn():
+#     if len(cppbool_arr):
+#         one = random.choice(cppbool_arr)
+#         s = one.fName + '::' + one.methodName + addParamToCallCpp(one.params, 0)
+#         return s
+#     return 'true'
+#
+# def addParamToCallCpp(params, times):
+#     ss = '('
+#     i = 0
+#     for param in params:
+#         if param == 'int' or param == 'long':
+#             p = random.randint(1, 1000)
+#             if i != 0:
+#                 ss += ' ,' + str(p)
+#             else:
+#                 ss += str(p)
+#         elif param == 'string':
+#             p = randomString()
+#             if i != 0:
+#                 ss += ' ,"' + p + '"'
+#             else:
+#                 ss += '"' + p + '"'
+#         elif param == 'bool':
+#             j = random.randint(0, 1)
+#             flag = 'true'
+#             if j == 0:
+#                 flag = 'false'
+#             if i != 0:
+#                 ss += ' ,' + flag
+#             else:
+#                 ss += flag
+#         i += 1
+#     ss += ')'
+#     return ss
