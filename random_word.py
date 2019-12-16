@@ -17,3 +17,6 @@ def random_word(size):
         return temp_list[0:100]
     return temp_list[0:size]
 
+def random_one():
+    random.shuffle(list)
+    return list[0]

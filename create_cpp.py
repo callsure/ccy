@@ -10,7 +10,7 @@ from create_method import methodObject
 from random_word import random_word
 
 ####这里的代码最好跟生成的oc代码目录分开，防止重名文件
-create_path = "/Users/xlin/Work/xcode/ccy/ccy"
+create_path = "/Users/xlin/Work/xcode/ccy/ccy/gg"
 create_num = 10
 if len(sys.argv) > 2:
     create_num = sys.argv[1]
@@ -68,7 +68,7 @@ for sa in ss:
     text_createHpp(s, create_path, msg1, msg2, msg3, arr)
 
     #########
-    msg5 = '#include "' + s + '.hpp"\n#include <string>\n#include <iostream>\n#include <cmath>\nusing namespace std;\n'
+    msg5 = '#include "' + s + '.hpp"\n#include <string>\n#include <iostream>\n#include <cmath>\n#include "LaData.h"\nusing namespace std;\n'
     msg4 = ''
     text_createCpp(s, create_path, msg5, msg4, msg3, arr)
 

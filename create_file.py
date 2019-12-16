@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 #生成oc的.h文件
-from create_method import handle_method, handle_methodcpp
+from create_method import handle_method, handle_methodcpp, handle_methodcpp2
 
 
 def text_createH(fileName, path, msg1, msg2, msg3, methodArray):
@@ -128,7 +128,7 @@ def text_createCpp(fileName, path, msg1, msg2, msg3, methodArray):
             methodHead = 'void'
         methodPamam = define_params(method.params)
         file.write(methodHead + ' ' + fileName + '::' + method.methodName + '(' + methodPamam + ') {\n')
-        methodBodycpp = handle_methodcpp(method.returnType)
+        methodBodycpp = handle_methodcpp2(method.returnType, method.params)
         file.write(methodBodycpp)
         file.write('}\n')
     # file.write('\n')
