@@ -25,7 +25,8 @@ class paramObject:
 
     def cont(self, index):
         #在这里替换占位符
-        print index
+        #print index
+        pass
 
 class paramsToParam:
     def __init__(self, cont, param, paramOutType):
@@ -786,8 +787,8 @@ def random_code(hadNum, index, paramIndex, lastType, upParam):
         cont += 'char ' + param + str(index + 2) + ' = ' + param + str(index + 1) + '[0];\n'
         cont += 'int ' + param + str(index + 3) + ',' + param + str(index + 4) + ';\n'
         cont += 'bool ' + param + str(index) + ';'
-        cont += "cc_" + str(index + 3) + " = (cc_" + str(index + 2) + " == 'a' || cc_" + str(index + 2) + " == 'e' || cc_" + str(index + 2) + " == 'i' || cc_" + str(index + 2) + " == 'o' || cc_" + str(index + 2) + " == 'u');\n"
-        cont += "cc_" + str(index + 4) + " = (cc_" + str(index + 2) + " == 'A' || cc_" + str(index + 2) + " == 'E' || cc_" + str(index + 2) + " == 'I' || cc_" + str(index + 2) + " == 'O' || cc_" + str(index + 2) + " == 'U');\n"
+        cont += "" + param + str(index + 3) + " = (" + param + str(index + 2) + " == 'a' || " + param + str(index + 2) + " == 'e' || " + param + str(index + 2) + " == 'i' || " + param + str(index + 2) + " == 'o' || " + param + str(index + 2) + " == 'u');\n"
+        cont += "" + param + str(index + 4) + " = (" + param + str(index + 2) + " == 'A' || " + param + str(index + 2) + " == 'E' || " + param + str(index + 2) + " == 'I' || " + param + str(index + 2) + " == 'O' || " + param + str(index + 2) + " == 'U');\n"
         cont += 'if (' + param + str(index + 3) + ' || ' + param + str(index + 4) + ')\n'
         cont += '' + param + str(index) + ' = true;\n'
         cont += 'else\n'
