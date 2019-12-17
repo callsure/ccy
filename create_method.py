@@ -15,12 +15,13 @@ class methodObject:
         self.fName = fName
 
 class paramObject:
-    def __init__(self, cont, param, paramOutType, paramInType, hadNum):
+    def __init__(self, cont, param, paramOutType, paramInType, hadNum, upParam):
         self.cont = cont
         self.param = param
         self.paramOutType = paramOutType #输出的类型
         self.paramInType = paramInType #输入的类型
         self.hadNum = hadNum
+        self.upParam = upParam
 
     def cont(self, index):
         #在这里替换占位符
@@ -670,10 +671,11 @@ def handle_methodcpp2(returnType, params):
     hadNum = []
     for n in range(2):
         #代码片段
-        pObject = random_code(hadNum, i, i - 10, lastType)
+        pObject = random_code(hadNum, i, i - 10, lastType, param)
         #判断是否需要转换
         if pObject.paramInType != lastType:
-            res += select_method(lastType, pObject.paramInType, i, param)
+            upParam = pObject.upParam
+            res += select_method(lastType, pObject.paramInType, i, param, upParam)
             i = i + 10
         i = i + 10
         res += pObject.cont
@@ -683,10 +685,11 @@ def handle_methodcpp2(returnType, params):
 
     if returnType != '':
         if returnType != lastType:
-            res += select_method(lastType, returnType, i, param)
-            res += 'return cc_' + str(i) + ';\n'
+            upParam = random_one() + '_' + str(i)
+            res += select_method(lastType, returnType, i, param, upParam)
+            res += 'return ' + upParam + ';\n'
         else:
-            res += 'return cc_' + str(i - 10) + ';\n'
+            res += 'return ' + param + ';\n'
     return res
 
 
@@ -695,39 +698,40 @@ def trans_params(params, index):
     index = index + 1
     res = ''
     sum = ''
+    pa = random_one() + '_' + str(start)
+    tu = random_one() + '_'
     for param in params:
         if param == 'string':
-            res += 'int cc_' + str(index) + ' = param' + str(index - 1) + '.length();\n'
-            sum += 'cc_' + str(index) + random.choice(marks)
+            res += 'int ' + tu + str(index) + ' = param' + str(index - 1) + '.length();\n'
+            sum += tu + str(index) + random.choice(marks)
             index = index + 1
         elif param == 'int':
-            res += 'int cc_' + str(index) + ' = param' + str(index - 1) + ';\n'
-            sum += 'cc_' + str(index) + random.choice(marks)
+            res += 'int ' + tu + str(index) + ' = param' + str(index - 1) + ';\n'
+            sum += tu + str(index) + random.choice(marks)
             index = index + 1
         elif param == 'long':
-            res += 'long cc_' + str(index) + ' = param' + str(index - 1) + ' / ' + str(random.randint(1000, 3000)) + ';\n'
-            sum += 'cc_' + str(index) + random.choice(marks)
+            res += 'long ' + tu + str(index) + ' = param' + str(index - 1) + ' / ' + str(random.randint(1000, 3000)) + ';\n'
+            sum += tu + str(index) + random.choice(marks)
             index = index + 1
         elif param == 'bool':
-            res += 'int cc_' + str(index) + ' = param' + str(index - 1) + '?1:0;\n'
-            sum += 'cc_' + str(index) + random.choice(marks)
+            res += 'int ' + tu + str(index) + ' = param' + str(index - 1) + '?1:0;\n'
+            sum += tu + str(index) + random.choice(marks)
             index = index + 1
-    sum = 'int cc_' + str(start) + '=' + sum + '1;\n'
+    sum = 'int ' + pa + '=' + sum + '1;\n'
     res += sum
-    pa = 'cc_' + str(start)
     return paramsToParam(res, pa, 'int')
 
 #随机代码片段
-def random_code(hadNum, index, paramIndex, lastType):
-    end = 39
+def random_code(hadNum, index, paramIndex, lastType, upParam):
+    end = 49
     j = random.randint(1, end)
     while(j in hadNum):
         j = random.randint(1, end)
     hadNum.append(j)
     paramInType = ''
     paramOutType = ''
-    param = ''
-    upParam = ''
+    param = random_one() + '_'
+    # upParam = ''
     cont = ''
     if j == 1:
         paramInType = 'int'
@@ -735,172 +739,204 @@ def random_code(hadNum, index, paramIndex, lastType):
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'string cc_' + str(index) + ' = to_string(cc_' + str(index + 1) + random.choice(marks) + str(random.randint(1, 30)) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'string ' + param + str(index) + ' = to_string(' + param + str(index + 1) + random.choice(marks) + str(random.randint(1, 30)) + ');\n'
+        param = param + str(index)
     elif j == 2:
         paramInType = 'int'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = cc_' + str(index + 1) + ' % 2 == 0 ? true : false;\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = ' + param + str(index + 1) + ' % 2 == 0 ? true : false;\n'
+        param = param + str(index)
     elif j == 3:
         paramInType = 'int'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index + 2) + ' = ' + str(random.randint(6, 300)) + ';\n'
-        cont += 'int cc_' + str(index) + ' = (cc_' + str(index + 1) + ' > cc_' + str(index + 2) + ')?cc_' + str(index + 1) + ' : cc_' + str(index + 2) + ';\n'
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index + 2) + ' = ' + str(random.randint(6, 300)) + ';\n'
+        cont += 'int ' + param + str(index) + ' = (' + param + str(index + 1) + ' > ' + param + str(index + 2) + ')?' + param + str(index + 1) + ' : ' + param + str(index + 2) + ';\n'
         cont += 'do{\n'
-        cont += 'if (cc_' + str(index) + ' % cc_' + str(index + 1) + ' == 0 && cc_' + str(index) + ' % cc_' + str(index + 2) + ' == 0) {\n'
+        cont += 'if (' + param + str(index) + ' % ' + param + str(index + 1) + ' == 0 && ' + param + str(index) + ' % ' + param + str(index + 2) + ' == 0) {\n'
         cont += 'break;\n'
         cont += '}\n'
         cont += 'else\n'
-        cont += '++cc_' + str(index) + ';\n'
+        cont += '++' + param + str(index) + ';\n'
         cont += '} while (true);\n'
-        param = 'cc_' + str(index)
+        param = param + str(index)
     elif j == 4:
         paramInType = 'string'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'string cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'char cc_' + str(index + 2) + ' = cc_' + str(index + 1) + '[0];\n'
-        cont += 'int cc_' + str(index + 3) + ',cc_' + str(index + 4) + ';\n'
-        cont += 'bool cc_' + str(index) + ';'
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'string ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'char ' + param + str(index + 2) + ' = ' + param + str(index + 1) + '[0];\n'
+        cont += 'int ' + param + str(index + 3) + ',' + param + str(index + 4) + ';\n'
+        cont += 'bool ' + param + str(index) + ';'
         cont += "cc_" + str(index + 3) + " = (cc_" + str(index + 2) + " == 'a' || cc_" + str(index + 2) + " == 'e' || cc_" + str(index + 2) + " == 'i' || cc_" + str(index + 2) + " == 'o' || cc_" + str(index + 2) + " == 'u');\n"
         cont += "cc_" + str(index + 4) + " = (cc_" + str(index + 2) + " == 'A' || cc_" + str(index + 2) + " == 'E' || cc_" + str(index + 2) + " == 'I' || cc_" + str(index + 2) + " == 'O' || cc_" + str(index + 2) + " == 'U');\n"
-        cont += 'if (cc_' + str(index + 3) + ' || cc_' + str(index + 4) + ')\n'
-        cont += 'cc_' + str(index) + ' = true;\n'
+        cont += 'if (' + param + str(index + 3) + ' || ' + param + str(index + 4) + ')\n'
+        cont += '' + param + str(index) + ' = true;\n'
         cont += 'else\n'
-        cont += 'cc_' + str(index) + ' = false;\n'
-        param = 'cc_' + str(index)
+        cont += '' + param + str(index) + ' = false;\n'
+        param = '' + param + str(index)
     elif j == 5:
         paramInType = 'int'
         paramOutType = 'string'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'string cc_' + str(index) + ' = "";\n'
-        cont += 'cc_' + str(index) + ' = cc_' + str(index + 1) + ' >= 90?"A" : (cc_' + str(index + 1) + ' >= 60)?"B":"C";\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'string ' + param + str(index) + ' = "";\n'
+        cont += '' + param + str(index) + ' = ' + param + str(index + 1) + ' >= 90?"A" : (' + param + str(index + 1) + ' >= 60)?"B":"C";\n'
+        param = '' + param + str(index)
     elif j == 6:
         paramInType = 'int'
         paramOutType = 'string'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'string cc_' + str(index) + ' = "";\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->getMapValue(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'string ' + param + str(index) + ' = "";\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->getMapValue(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 7:
         paramInType = 'int'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = false;\n'
-        cont += 'string cc_' + str(index + 2) + ' = "' + str(random.randint(3, 300)) + '";\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->addMapValue(cc_' + str(index + 1) + ', const_cast<char*>(cc_' + str(index + 2) + '.data()));\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = false;\n'
+        cont += 'string ' + param + str(index + 2) + ' = "' + str(random.randint(3, 300)) + '";\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->addMapValue(' + param + str(index + 1) + ', const_cast<char*>(' + param + str(index + 2) + '.data()));\n'
+        param = '' + param + str(index)
     elif j == 8:
         paramInType = 'int'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = false;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->deleMapValue(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = false;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->deleMapValue(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 9:
         paramInType = 'int'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->getMapSize(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->getMapSize(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 10:
         paramInType = 'bool'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'bool cc_' + str(index) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'Singleton::Instance()->cleanMap(cc_' + str(index) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'bool ' + param + str(index) + ' = ' + upParam + ';\n'
+        cont += 'Singleton::Instance()->cleanMap(' + param + str(index) + ');\n'
+        param = '' + param + str(index)
     elif j == 11:
         paramInType = 'bool'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'bool cc_' + str(index) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'Singleton::Instance()->cleanMapInt(cc_' + str(index) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'bool ' + param + str(index) + ' = ' + upParam + ';\n'
+        cont += 'Singleton::Instance()->cleanMapInt(' + param + str(index) + ');\n'
+        param = '' + param + str(index)
     elif j == 12:
         paramInType = 'int'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->getMapIntSize(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->getMapIntSize(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 13:
         paramInType = 'int'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->addMapIntValue(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->addMapIntValue(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 14:
         paramInType = 'int'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = false;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->deleMapIntValue(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = false;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->deleMapIntValue(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 15:
         paramInType = 'int'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = false;\n'
-        cont += 'int cc_' + str(index + 2) + ' = ' + str(random.randint(3, 300)) + ';\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->addMapIntValue(cc_' + str(index + 1) + ', cc_' + str(index + 2) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = false;\n'
+        cont += 'int ' + param + str(index + 2) + ' = ' + str(random.randint(3, 300)) + ';\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->addMapIntValue(' + param + str(index + 1) + ', ' + param + str(index + 2) + ');\n'
+        param = '' + param + str(index)
     elif j == 16:
         paramInType = 'int'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->getMapIntValue(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->getMapIntValue(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
 
     elif j == 17:
         paramInType = 'int'
@@ -908,90 +944,108 @@ def random_code(hadNum, index, paramIndex, lastType):
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = false;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->addSetInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = false;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->addSetInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 18:
         paramInType = 'int'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->getSetInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->getSetInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 19:
         paramInType = 'bool'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'bool cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->getSetIntSize(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'bool ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->getSetIntSize(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 20:
         paramInType = 'int'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = false;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->deleteSetInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = false;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->deleteSetInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 21:
         paramInType = 'bool'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'bool cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = false;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->cleanSetInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'bool ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = false;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->cleanSetInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 22:
         paramInType = 'int'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->findSetInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->findSetInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 23:
         paramInType = 'int'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->countSetInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->countSetInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 24:
         paramInType = 'int'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->lowerSetInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->lowerSetInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 25:
         paramInType = 'int'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->upperSetInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->upperSetInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
 
     elif j == 26:
         paramInType = 'string'
@@ -999,90 +1053,108 @@ def random_code(hadNum, index, paramIndex, lastType):
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'string cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = false;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->addSetString(const_cast<char*>(cc_' + str(index + 1) + '.data()));\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'string ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = false;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->addSetString(const_cast<char*>(' + param + str(index + 1) + '.data()));\n'
+        param = '' + param + str(index)
     elif j == 27:
         paramInType = 'string'
         paramOutType = 'string'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'string cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'string cc_' + str(index) + ' = "";\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->getSetString(const_cast<char*>(cc_' + str(index + 1) + '.data()));\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'string ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'string ' + param + str(index) + ' = "";\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->getSetString(const_cast<char*>(' + param + str(index + 1) + '.data()));\n'
+        param = '' + param + str(index)
     elif j == 28:
         paramInType = 'bool'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'bool cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->getSetStringSize(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'bool ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->getSetStringSize(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 29:
         paramInType = 'string'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'string cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = false;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->deleteSetString(const_cast<char*>(cc_' + str(index + 1) + '.data()));\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'string ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = false;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->deleteSetString(const_cast<char*>(' + param + str(index + 1) + '.data()));\n'
+        param = '' + param + str(index)
     elif j == 30:
         paramInType = 'bool'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'bool cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = false;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->cleanSetString(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'bool ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = false;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->cleanSetString(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 31:
         paramInType = 'string'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'string cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->findSetString(const_cast<char*>(cc_' + str(index + 1) + '.data()));\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'string ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->findSetString(const_cast<char*>(' + param + str(index + 1) + '.data()));\n'
+        param = '' + param + str(index)
     elif j == 32:
         paramInType = 'string'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'string cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->countSetString(const_cast<char*>(cc_' + str(index + 1) + '.data()));\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'string ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->countSetString(const_cast<char*>(' + param + str(index + 1) + '.data()));\n'
+        param = '' + param + str(index)
     elif j == 33:
         paramInType = 'string'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'string cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->lowerSetString(const_cast<char*>(cc_' + str(index + 1) + '.data()));\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'string ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->lowerSetString(const_cast<char*>(' + param + str(index + 1) + '.data()));\n'
+        param = '' + param + str(index)
     elif j == 34:
         paramInType = 'string'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'string cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->upperSetString(const_cast<char*>(cc_' + str(index + 1) + '.data()));\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'string ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->upperSetString(const_cast<char*>(' + param + str(index + 1) + '.data()));\n'
+        param = '' + param + str(index)
 
     elif j == 35:
         paramInType = 'string'
@@ -1090,184 +1162,214 @@ def random_code(hadNum, index, paramIndex, lastType):
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'string cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = false;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->addStackString(const_cast<char*>(cc_' + str(index + 1) + '.data()));\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'string ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = false;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->addStackString(const_cast<char*>(' + param + str(index + 1) + '.data()));\n'
+        param = '' + param + str(index)
     elif j == 36:
         paramInType = 'bool'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'bool cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->getStackStringSize(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'bool ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->getStackStringSize(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 37:
         paramInType = 'string'
         paramOutType = 'string'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'string cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'string cc_' + str(index) + ' = "";\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->topStackString(const_cast<char*>(cc_' + str(index + 1) + '.data()));\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'string ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'string ' + param + str(index) + ' = "";\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->topStackString(const_cast<char*>(' + param + str(index + 1) + '.data()));\n'
+        param = '' + param + str(index)
     elif j == 38:
         paramInType = 'bool'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'bool cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = false;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->popStackString(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'bool ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = false;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->popStackString(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 39:
         paramInType = 'bool'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'bool cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = false;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->popStackInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'bool ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = false;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->popStackInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 40:
         paramInType = 'int'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->topStackInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->topStackInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 41:
         paramInType = 'int'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->getStackIntSize(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->getStackIntSize(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 42:
         paramInType = 'int'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = false;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->addStackInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = false;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->addStackInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 43:
         paramInType = 'int'
         paramOutType = 'bool'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'bool cc_' + str(index) + ' = false;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->setInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'bool ' + param + str(index) + ' = false;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->setInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 44:
         paramInType = 'int'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->getInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->getInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 45:
         paramInType = 'int'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->sumInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->sumInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 46:
         paramInType = 'long'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'long cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->multInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'long ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->multInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 47:
         paramInType = 'long'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->divisionInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->divisionInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     elif j == 48:
         paramInType = 'long'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
-        cont += 'cc_' + str(index) + ' = Singleton::Instance()->modlInt(cc_' + str(index + 1) + ');\n'
-        param = 'cc_' + str(index)
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
+        cont += '' + param + str(index) + ' = Singleton::Instance()->modlInt(' + param + str(index + 1) + ');\n'
+        param = '' + param + str(index)
     else:
         paramInType = 'int'
         paramOutType = 'int'
         if paramInType != lastType:
             index = index + 10
             paramIndex = paramIndex + 10
-        cont += 'int cc_' + str(index + 1) + ' = cc_' + str(paramIndex) + ';\n'
-        cont += 'int cc_' + str(index + 2) + '[10] = {' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + '};//一维数组中包含10个整数\n'
-        cont += 'int cc_' + str(index) + ' = 0;\n'
+            #这里不同，意味着要发生一次转换
+            upParam = random_one() + '_' + str(paramIndex)
+        cont += 'int ' + param + str(index + 1) + ' = ' + upParam + ';\n'
+        cont += 'int ' + param + str(index + 2) + '[10] = {' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + ',' + str(random.randint(6, 300)) + '};//一维数组中包含10个整数\n'
+        cont += 'int ' + param + str(index) + ' = 0;\n'
         cont += 'for(int i = 0; i < 10; i++){\n'
-        cont += 'if (cc_' + str(index + 2) + '[i] < cc_' + str(index + 1) + ')\n'
-        cont += 'cc_' + str(index) + '++;\n'
+        cont += 'if (' + param + str(index + 2) + '[i] < ' + param + str(index + 1) + ')\n'
+        cont += '' + param + str(index) + '++;\n'
         cont += '}\n'
-        param = 'cc_' + str(index)
-    return paramObject(cont, param, paramOutType, paramInType, hadNum)
+        param = '' + param + str(index)
+    return paramObject(cont, param, paramOutType, paramInType, hadNum, upParam)
     
 
-def select_method(inType, outType, index, param):
+def select_method(inType, outType, index, param, upParam):
     if inType == 'string':
         if outType == 'int':
-            return trans_type.transCpp_String_Int(index, param)
+            return trans_type.transCpp_String_Int(index, param, upParam)
         elif outType == 'long':
-            return trans_type.transCpp_String_Long(index, param)
+            return trans_type.transCpp_String_Long(index, param, upParam)
         elif outType == 'bool':
-            return trans_type.transCpp_String_Bool(index, param)
+            return trans_type.transCpp_String_Bool(index, param, upParam)
     elif inType == 'int':
         if outType == 'string':
-            return trans_type.transCpp_Int_String(index, param)
+            return trans_type.transCpp_Int_String(index, param, upParam)
         elif outType == 'long':
-            return trans_type.transCpp_Int_Long(index, param)
+            return trans_type.transCpp_Int_Long(index, param, upParam)
         elif outType == 'bool':
-            return trans_type.transCpp_Int_Bool(index, param)
+            return trans_type.transCpp_Int_Bool(index, param, upParam)
     elif inType == 'long':
         if outType == 'int':
-            return trans_type.transCpp_Long_Int(index, param)
+            return trans_type.transCpp_Long_Int(index, param, upParam)
         elif outType == 'string':
-            return trans_type.transCpp_Long_String(index, param)
+            return trans_type.transCpp_Long_String(index, param, upParam)
         elif outType == 'bool':
-            return trans_type.transCpp_Long_Bool(index, param)
+            return trans_type.transCpp_Long_Bool(index, param, upParam)
     elif inType == 'bool':
         if outType == 'int':
-            return trans_type.transCpp_Bool_Int(index, param)
+            return trans_type.transCpp_Bool_Int(index, param, upParam)
         elif outType == 'long':
-            return trans_type.transCpp_Bool_Long(index, param)
+            return trans_type.transCpp_Bool_Long(index, param, upParam)
         elif outType == 'string':
-            return trans_type.transCpp_Bool_String(index, param)
+            return trans_type.transCpp_Bool_String(index, param, upParam)
     return ''
